@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle</title>
+    <link rel="stylesheet" href="css.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            chance = 0;
+
+            $('.unableEdit').children().css('background-color', '#353535');
+            $('.enableEdit').children().css('background-color', '#353535');
+            $('.unableEdit').children().attr('disabled', true);
+            
+            $('.authInput').keydown(function(e) {
+                if (this.value.length === this.maxLength) {
+                    let next = $(this).data('next');
+                    let row = $(this).data('row');
+                    $('#n' + next + row).focus();
+                }
+            });
+
+            $('.authInput').keyup(function(e) {
+                if(e.keyCode == 13){
+                    let row = $(this).data('row');
+                    let word = '';
+                    for(let i = 0; i < 5; i++){
+                        word += $('#n' + i + row).val();
+                    }
+                    axios.post('http://localhost:8000/words', { "guess": word }).then(response =>{
+                        let obj = response.data;
+                        
+                        console.log(obj.character_info);
+                        for(let i = 0; i < 5; i++){
+                            if(obj.was_correct == true){
+                                RefreshRow(i, row, 'correct');
+                            }else{
+                                if(obj.character_info[i].scoring.in_word == true){
+                                    RefreshRow(i, row, 'in_word');
+                                } else {
+                                    RefreshRow(i, row, 'nothing');
+                                }
+                                if(obj.character_info[i].scoring.correct_idx == true){
+                                    RefreshRow(i, row, 'correct');
+                                }
+
+                            }
+                        }
+                        if(obj.was_correct == false){
+                            chance++
+                            console.log(chance);
+                            $('#' + chance).children().attr('disabled', false);
+                            $('#n0' + chance).focus();
+                            if(chance == 6){
+                                alert('Voce perdeu!');
+                            }
+                        }
+                    })
+                }
+            });
+        });
+        function RefreshRow(col, row, state){
+            if(state == 'correct'){
+                $('#n' + col + row).css('background-color', '#538d4e');
+                $('#n' + col + row).attr('disabled', true);
+            }else if(state == 'in_word'){
+                $('#n' + col + row).css('background-color', '#b59f3b');
+                $('#n' + col + row).attr('disabled', true);
+            }else if(state == 'nothing'){
+                $('#n' + col + row).css('background-color', '#636363');
+                $('#n' + col + row).attr('disabled', true);
+            }
+        }
+    </script>
+</head>
+<body>
+    <form action="">
+        <div class="row enableEdit" id="0">
+            <input type="text" class="authInput" id="n00" autocomplete="off" maxlength="1" data-next="1" data-row="0">
+            <input type="text" class="authInput" id="n10" autocomplete="off" maxlength="1" data-next="2" data-row="0">
+            <input type="text" class="authInput" id="n20" autocomplete="off" maxlength="1" data-next="3" data-row="0">
+            <input type="text" class="authInput" id="n30" autocomplete="off" maxlength="1" data-next="4" data-row="0">
+            <input type="text" class="authInput" id="n40" autocomplete="off" maxlength="1" data-row="0">
+        </div>
+        <div class="row unableEdit" id="1">
+            <input type="text" class="authInput" id="n01" autocomplete="off" maxlength="1" data-next="1" data-row="1">
+            <input type="text" class="authInput" id="n11" autocomplete="off" maxlength="1" data-next="2" data-row="1">
+            <input type="text" class="authInput" id="n21" autocomplete="off" maxlength="1" data-next="3" data-row="1">
+            <input type="text" class="authInput" id="n31" autocomplete="off" maxlength="1" data-next="4" data-row="1">
+            <input type="text" class="authInput" id="n41" autocomplete="off" maxlength="1" data-row="1">
+        </div>
+        <div class="row unableEdit" id="2">
+            <input type="text" class="authInput" id="n02" autocomplete="off" maxlength="1" data-next="1" data-row="2">
+            <input type="text" class="authInput" id="n12" autocomplete="off" maxlength="1" data-next="2" data-row="2">
+            <input type="text" class="authInput" id="n22" autocomplete="off" maxlength="1" data-next="3" data-row="2">
+            <input type="text" class="authInput" id="n32" autocomplete="off" maxlength="1" data-next="4" data-row="2">
+            <input type="text" class="authInput" id="n42" autocomplete="off" maxlength="1" data-row="2">
+        </div>
+        <div class="row unableEdit" id="3">
+            <input type="text" class="authInput" id="n03" autocomplete="off" maxlength="1" data-next="1" data-row="3">
+            <input type="text" class="authInput" id="n13" autocomplete="off" maxlength="1" data-next="2" data-row="3">
+            <input type="text" class="authInput" id="n23" autocomplete="off" maxlength="1" data-next="3" data-row="3">
+            <input type="text" class="authInput" id="n33" autocomplete="off" maxlength="1" data-next="4" data-row="3">
+            <input type="text" class="authInput" id="n43" autocomplete="off" maxlength="1" data-row="3">
+        </div>
+        <div class="row unableEdit" id="4">
+            <input type="text" class="authInput" id="n04" autocomplete="off" maxlength="1" data-next="1" data-row="4">
+            <input type="text" class="authInput" id="n14" autocomplete="off" maxlength="1" data-next="2" data-row="4">
+            <input type="text" class="authInput" id="n24" autocomplete="off" maxlength="1" data-next="3" data-row="4">
+            <input type="text" class="authInput" id="n34" autocomplete="off" maxlength="1" data-next="4" data-row="4">
+            <input type="text" class="authInput" id="n44" autocomplete="off" maxlength="1" data-row="4">
+        </div>
+        <div class="row unableEdit" id="5">
+            <input type="text" class="authInput" id="n05" autocomplete="off" maxlength="1" data-next="1" data-row="5">
+            <input type="text" class="authInput" id="n15" autocomplete="off" maxlength="1" data-next="2" data-row="5">
+            <input type="text" class="authInput" id="n25" autocomplete="off" maxlength="1" data-next="3" data-row="5">
+            <input type="text" class="authInput" id="n35" autocomplete="off" maxlength="1" data-next="4" data-row="5">
+            <input type="text" class="authInput" id="n45" autocomplete="off" maxlength="1" data-row="5">
+        </div>
+    </form>
+</body>
+</html>
